@@ -9,7 +9,8 @@
 ```
 .
 ├── init_db.py              # DB 초기화 + 시드 데이터
-├── app.py                  # Streamlit 대시보드
+├── backend/                # FastAPI API 서버
+├── frontend/               # Next.js 프론트엔드
 ├── update_market_data.py   # FRED / EIA / BOK / yfinance 등 API 업서트
 ├── crawl_market_data.py    # Investing / USGS / Asian Metal 등 크롤·스크랩 업서트
 ├── scrapers/               # 사이트별 수집 모듈
@@ -20,11 +21,14 @@
 
 ---
 
-## 🚀 실행 방법
+## 🚀 실행 방법 (추천 흐름)
 
 ### 1단계: 패키지 설치
 ```bash
 pip install -r requirments.txt
+```
+```bash
+cd frontend && npm install
 ```
 
 ### 2단계: DB 초기화 (최초 1회만)
@@ -42,11 +46,27 @@ python update_market_data.py
 python crawl_market_data.py
 ```
 
-### 3단계: 대시보드 실행
+### 3단계: 원클릭 실행 (권장)
 ```bash
-streamlit run app.py
+python run_all.py
 ```
-→ 브라우저에서 `http://localhost:8501` 자동 오픈
+→ 프론트: `http://localhost:3000` / API: `http://localhost:8000`
+
+### 4단계: 종료
+```bash
+python stop_all.py
+```
+
+### (참고) 수동 실행
+```bash
+# 터미널 1
+cd backend
+python main.py
+
+# 터미널 2
+cd frontend
+npm run dev
+```
 
 ---
 
