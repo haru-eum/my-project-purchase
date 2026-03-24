@@ -1,0 +1,16 @@
+services:
+  - type: web
+    name: my-project-purchase-backend
+    runtime: python
+    rootDir: backend
+    buildCommand: pip install -r requirements.txt
+    startCommand: python main.py
+    envVars:
+      - key: UVICORN_RELOAD
+        value: "0"
+      - key: DB_PATH
+        value: /opt/render/project/src/scm_dashboard.db
+      - key: CORS_ORIGINS
+        sync: false
+      - key: CORS_ORIGIN_REGEX
+        value: https://.*\.vercel\.app

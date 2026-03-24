@@ -3,7 +3,10 @@
 import os
 import sqlite3
 
-DB_PATH = os.path.join(os.path.dirname(os.path.dirname(__file__)), "..", "scm_dashboard.db")
+_default_db = os.path.abspath(
+    os.path.join(os.path.dirname(__file__), "..", "..", "scm_dashboard.db")
+)
+DB_PATH = os.getenv("DB_PATH", _default_db)
 
 _conn: sqlite3.Connection | None = None
 

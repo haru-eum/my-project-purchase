@@ -31,9 +31,19 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(title="SCM 원자재 리스크 대시보드 API", lifespan=lifespan)
 
+_cors_raw = os.getenv(
+    "CORS_ORIGINS",
+    "http://localhost:3000,http://127.0.0.1:3000",
+)
+_cors_regex = os.getenv("CORS_ORIGIN_REGEX", "").strip()
+_cors_origins = [o.strip() for o in _cors_raw.split(",") if o.strip()]
+if _cors_raw.strip() == "*":
+    _cors_origins = ["*"]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000", "http://127.0.0.1:3000"],
+    allow_origins=_cors_origins,
+    allow_origin_regex=_cors_regex or None,
     allow_methods=["*"],
     allow_headers=["*"],
 )
@@ -43,4 +53,6 @@ app.include_router(router)
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)
+
+    _reload = os.getenv("UVICORN_RELOAD", "1").lower() in ("1", "true", "yes")
+    uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=_reload)
