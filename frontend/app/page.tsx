@@ -36,7 +36,7 @@ type CoverageRow = {
 };
 type DataSourceRow = { name_kr: string; source: string; row_count: number };
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+const API_BASE = "";
 const Plot = dynamic(() => import("react-plotly.js"), { ssr: false });
 
 const INDUSTRY_LABEL: Record<string, string> = {
