@@ -48,7 +48,12 @@ def main() -> int:
         env={"UVICORN_RELOAD": "1"},
     )
     time.sleep(1.0)
-    frontend_proc = _spawn(["npm", "run", "dev"], FRONTEND_DIR)
+    if os.name == "nt":
+        # Windows에서 npm.cmd 경로 이슈를 피하려고 cmd를 통해 실행한다.
+        frontend_cmd = ["cmd", "/c", "npm", "run", "dev"]
+    else:
+        frontend_cmd = ["npm", "run", "dev"]
+    frontend_proc = _spawn(frontend_cmd, FRONTEND_DIR)
 
     payload = {
         "backend_pid": backend_proc.pid,

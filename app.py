@@ -553,20 +553,27 @@ id_to_kr = dict(
 coverage_df = build_period_coverage_report(
     full_df, query_start, query_end, selected_ids, id_to_kr
 )
-st.subheader("기간 적합성 점검")
-st.caption(
-    "선택한 조회 구간의 **영업일 수** 대비, 환율 JOIN까지 통과한 **가격 관측일 수**입니다. "
-    "크롤링 스냅샷(리튬 등)은 관측이 1일뿐일 수 있습니다."
-)
-st.dataframe(coverage_df, use_container_width=True, hide_index=True)
-if (coverage_df["관측일수"] == 0).any():
-    st.warning(
-        "일부 원자재는 위 기간에서 데이터를 찾지 못했습니다. "
-        "`python crawl_market_data.py` 또는 `python update_market_data.py`로 갱신·범위를 확인하세요."
-    )
-
 metrics_df = compute_metrics(full_df)
 exchange_df = full_df[["날짜", "환율_KRW"]].drop_duplicates().sort_values("날짜")
+src_df = pd.DataFrame()
+if "데이터_출처" in full_df.columns:
+    src_df = (
+        full_df.groupby(["원자재", "데이터_출처"], as_index=False)
+        .size()
+        .rename(columns={"size": "행수"})
+    )
+
+with st.sidebar:
+    st.markdown("---")
+    menu = st.radio(
+        "메뉴",
+        [
+            "📊 종합 요약 (Executive Summary)",
+            "🏭 산업별 상세 분석 (Industry Deep Dive)",
+            "⚙️ 데이터 무결성 및 설정 (Data Quality & Settings)",
+        ],
+        index=0,
+    )
 
 st.markdown(
     f"""
@@ -578,30 +585,7 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
-with st.expander("데이터 적용 방식·공신력(필독)", expanded=False):
-    st.markdown(
-        """
-        - **조회 구간**: 위 기간은 `PriceHistory`·`ExchangeRates`에 **실제로 존재하는 날짜**만 사용합니다(없는 날은 JOIN에서 빠짐).
-        - **기본 시드**: `python init_db.py`로 넣은 값은 **통계 모형 기반 더미(DUMMY)** 이며, 시장 가격을 **대체·증명**하지 않습니다.
-        - **실데이터 반영**: `python update_market_data.py` 실행 시 FRED·EIA·한국은행(ECOS)·yfinance(보조) 등이 들어오면 행 단위 `source`가 갱신됩니다(같은 날짜는 업서트).
-        - **공신력**: FRED/EIA/BOK은 공식·준공식 통계에 가깝고, yfinance는 비공식이며 **참고용**으로 두는 것이 안전합니다.
-        - **크롤링**: 앱 UI는 크롤링하지 않습니다. 배치로 **`python crawl_market_data.py`** 를 실행하면 Investing/USGS/Asian Metal 등 보조 수집 후 DB에 업서트합니다(이용약관 준수는 운영 책임).
-        """
-    )
-    if "데이터_출처" in full_df.columns:
-        src_df = (
-            full_df.groupby(["원자재", "데이터_출처"], as_index=False)
-            .size()
-            .rename(columns={"size": "행수"})
-        )
-        st.caption("선택 기간·원자재별 가격 행의 출처(혼재 시 둘 이상 표시될 수 있음)")
-        st.dataframe(src_df, use_container_width=True, hide_index=True)
-
-tab_summary, tab_auto, tab_pharma, tab_energy = st.tabs(
-    ["대시보드 개요 (Summary)", "모빌리티 & 배터리 (Automotive)", "제약 & 바이오 (Pharmaceutical)", "에너지 & IT (Energy/Tech)"]
-)
-
-with tab_summary:
+if menu == "📊 종합 요약 (Executive Summary)":
     st.subheader("전체 변동률 Top 5 및 환율 요약")
     top5 = metrics_df.sort_values("기간변동_%", ascending=False).head(5)[["원자재", "category", "전일대비_%", "기간변동_%", "연환산변동성_%"]].copy()
     top5["산업군"] = top5["category"].map(lambda x: INDUSTRY_MAP.get(str(x), str(x)))
@@ -673,14 +657,50 @@ def render_industry_tab(industry_code: str, tab_key: str) -> None:
     col_m.metric("연환산 변동성", f"{summary_row['연환산변동성_%']:.1f}%")
 
 
-with tab_auto:
-    render_industry_tab("Automotive", "auto")
+if menu == "🏭 산업별 상세 분석 (Industry Deep Dive)":
+    industry_choice = st.selectbox(
+        "산업군 선택",
+        options=INDUSTRY_TAB_ORDER,
+        format_func=lambda code: INDUSTRY_MAP.get(code, code),
+        index=0,
+    )
+    tab_key_map = {
+        "Automotive": "auto",
+        "Pharma": "pharma",
+        "Energy": "energy",
+    }
+    render_industry_tab(industry_choice, tab_key_map[industry_choice])
 
-with tab_pharma:
-    render_industry_tab("Pharma", "pharma")
+if menu == "⚙️ 데이터 무결성 및 설정 (Data Quality & Settings)":
+    st.subheader("데이터 적용 방식·공신력(필독)")
+    st.markdown(
+        """
+        - **조회 구간**: 위 기간은 `PriceHistory`·`ExchangeRates`에 **실제로 존재하는 날짜**만 사용합니다(없는 날은 JOIN에서 빠짐).
+        - **기본 시드**: `python init_db.py`로 넣은 값은 **통계 모형 기반 더미(DUMMY)** 이며, 시장 가격을 **대체·증명**하지 않습니다.
+        - **실데이터 반영**: `python update_market_data.py` 실행 시 FRED·EIA·한국은행(ECOS)·yfinance(보조) 등이 들어오면 행 단위 `source`가 갱신됩니다(같은 날짜는 업서트).
+        - **공신력**: FRED/EIA/BOK은 공식·준공식 통계에 가깝고, yfinance는 비공식이며 **참고용**으로 두는 것이 안전합니다.
+        - **크롤링**: 앱 UI는 크롤링하지 않습니다. 배치로 **`python crawl_market_data.py`** 를 실행하면 Investing/USGS/Asian Metal 등 보조 수집 후 DB에 업서트합니다(이용약관 준수는 운영 책임).
+        """
+    )
 
-with tab_energy:
-    render_industry_tab("Energy", "energy")
+    st.subheader("기간 적합성 점검")
+    st.caption(
+        "선택한 조회 구간의 **영업일 수** 대비, 환율 JOIN까지 통과한 **가격 관측일 수**입니다. "
+        "크롤링 스냅샷(리튬 등)은 관측이 1일뿐일 수 있습니다."
+    )
+    st.dataframe(coverage_df, use_container_width=True, hide_index=True)
+    if (coverage_df["관측일수"] == 0).any():
+        st.warning(
+            "일부 원자재는 위 기간에서 데이터를 찾지 못했습니다. "
+            "`python crawl_market_data.py` 또는 `python update_market_data.py`로 갱신·범위를 확인하세요."
+        )
+
+    st.subheader("데이터 출처별 행수")
+    if not src_df.empty:
+        st.caption("선택 기간·원자재별 가격 행의 출처(혼재 시 둘 이상 표시될 수 있음)")
+        st.dataframe(src_df, use_container_width=True, hide_index=True)
+    else:
+        st.info("데이터 출처 정보가 없습니다.")
 
 st.markdown("<br>", unsafe_allow_html=True)
 st.caption(
