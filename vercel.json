@@ -1,7 +1,6 @@
 {
   "framework": "nextjs",
-  "installCommand": "npm install --prefix frontend",
-  "buildCommand": "npm run build --prefix frontend",
-  "devCommand": "npm run dev --prefix frontend",
-  "outputDirectory": "frontend/.next"
+  "installCommand": "if [ -f frontend/package.json ]; then npm install --prefix frontend; else npm install; fi",
+  "buildCommand": "if [ -f frontend/package.json ]; then npm run build --prefix frontend; else npm run build; fi",
+  "devCommand": "if [ -f frontend/package.json ]; then npm run dev --prefix frontend; else npm run dev; fi"
 }
