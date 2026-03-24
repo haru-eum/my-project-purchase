@@ -1,0 +1,34 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(find C:trade_ax_cursormy-project-purchase/scrapers -type f -name *.py)",
+      "Bash(python update_market_data.py)",
+      "Bash(python crawl_market_data.py)",
+      "Bash(python -c \":*)",
+      "Bash(pip install:*)",
+      "Bash(npx create-next-app@latest frontend --typescript --tailwind --app --no-eslint --no-src-dir --use-npm --no-import-alias)",
+      "Bash(npx --yes create-next-app@latest frontend --typescript --tailwind --app --no-eslint --no-src-dir --use-npm --no-import-alias --turbopack)",
+      "Bash(/dev/null yes:*)",
+      "Bash(npm install:*)",
+      "Bash(npx next:*)",
+      "Bash(curl -s http://localhost:8000/api/date-bounds)",
+      "Bash(curl -s http://localhost:3000)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:3000)",
+      "mcp__Claude_Preview__preview_start",
+      "Bash(netstat -ano)",
+      "Bash(taskkill //PID 21692 //F)",
+      "Bash(ls /c/trade_ax_cursor/my-project-purchase/frontend/node_modules/.bin/next*)",
+      "Bash(curl -s http://localhost:8000/api/prices?start=2025-01-01)",
+      "Bash(python -c \"import json,sys; d=json.load\\(sys.stdin\\); print\\(type\\(d\\)\\); print\\(str\\(d\\)[:500]\\)\")",
+      "Bash(python -c \"import json,sys; print\\(json.load\\(sys.stdin\\)\\)\")",
+      "Bash(curl -s \"http://localhost:8000/api/materials\")",
+      "Bash(python -c \"import json,sys; mats=json.load\\(sys.stdin\\); ids='''',''''.join\\([str\\(m[''''material_id'''']\\) for m in mats]\\); print\\(ids\\)\")",
+      "Bash(curl -s \"http://localhost:8000/api/metrics?start_date=2025-01-01&end_date=2026-03-24&material_ids=1,2,3,4,5,6,7,8,9,10,11,12,13\")",
+      "Bash(curl -s \"http://localhost:8000/api/metrics?start_date=2025-01-01&end_date=2026-03-24&material_ids=1,3\")",
+      "Bash(curl -s \"http://localhost:8000/api/metrics?start_date=2025-01-01&end_date=2026-03-24&material_ids=1,3,5,6\")",
+      "Bash(curl -s \"http://localhost:8000/api/prices?start_date=2025-12-01&end_date=2026-01-15&material_ids=1\")",
+      "Bash(curl -s \"http://localhost:8000/api/metrics?start_date=2025-03-24&end_date=2026-03-24&material_ids=1,2,3,4,5,6,7,8,9,10,11,12,13\")",
+      "Bash(curl -s http://localhost:8501 -o /dev/null -w \"%{http_code}\")"
+    ]
+  }
+}
